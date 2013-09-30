@@ -1,0 +1,63 @@
+cat <<EOF | chroot "$imagedir" apt-key add -
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+Version: GnuPG v1.0.7 (GNU/Linux)
+
+mQGiBEmeBK4RBACagpYbCFBzfJIxKGcT5gu+GP3GffG/noXHCQhMFTz2qOGh2PYA
+QCTwffiS2QoAqoyKSQ5rvM90bJklkROxPcUW4PfYtBi1P2NeeiZKf4MSMjA9+9tP
+FCczOD6MXxSz8K1p4esWsPsuLYd1c1w72pvAhehFtRs5f/1j1nlJlfGQ+wCgxs1p
+ew0YdtJ+xxKLN4V8LEjxv9UD+gMhjH23HupK6q1UzSJa2QkOoTBKw2Tj5YaYEzUW
+voCiZkVu59QfBxcDZAUidBA6S2KTgveh8kIq3WoryE2UYPMmuInesQdZsLp6SmNy
+PkUHHGDk4bbeDNWxyGJBYah0rUunL/VAeeUG5rYReLMUnU/EM4tBim+G/94+sp/t
+lByAA/9+IZuNL7krgW1ZUl/8m5bfmfGnhDlDgou6Ds2zmG48oU1weH7Tb7A+8srU
+IoIRsDCaNKSWPbjZRCTCsC8lVtuBVTx2Pj6PXz7J3qnQ19+RTltk56/vnRu21iK6
+VEBE4NPSWpk0RQgvsNeu0vRoS6rVEWkr8jeL+lWYvJayXnFFgrQ8QW5jaG9yIFN5
+c3RlbXMgKHBhY2thZ2Ugc2lnbmluZyBrZXkpIDxzdXBwb3J0QGFuY2hvci5uZXQu
+YXU+iGYEExECACYFAkmeBK4CGwMFCQlmAYAGCwkIBwMCBBUCCAMEFgIDAQIeAQIX
+gAAKCRA6lHasw7+QbhQrAKCMxfKCeCBxWHyK3S1k9ry2dq6y+gCeIudE8S6688MN
+1W3N7FNu3jnlWoc=
+=dZ8P
+-----END PGP PUBLIC KEY BLOCK-----
+EOF
+
+cat <<EOF >"$imagedir"/etc/apt/sources.list.d/100feature-puppet.list
+deb http://packages.anchor.net.au/feature/puppet/debian $codename puppet
+EOF
+
+cat <<EOF >>"$imagedir"/etc/apt/preferences
+Package: *
+Pin: release c=puppet
+Pin-Priority: 800
+EOF
+
+chroot "$imagedir" echo 'Apt::Install-Recommends "false";' >/etc/apt/apt.conf.d/02no-recommends
+chroot "$imagedir" echo 'Acquire::PDiffs "false";' >/etc/apt/apt.conf.d/03no-pdiffs
+
+chroot "$imagedir" apt-get install -y puppet
+
+chroot "$imagedir" update-rc.d puppet disable
+chroot "$imagedir" apt-get install -y ruby1.8-dev rubygems build-essential git lsb-release libaugeas-ruby1.8
+chroot "$imagedir" gem1.8 install librarian-puppet --no-rdoc --no-ri
+chroot "$imagedir" gem1.8 install ipaddress        --no-rdoc --no-ri
+
+
+
+cat <<EOF >"$imagedir"/etc/puppet/puppet.conf
+[main]
+        confdir = /etc/puppet
+        vardir = /var/lib/puppet
+        ssldir = $vardir/ssl
+        logdir = /var/log/puppet
+        rundir = /var/run/puppet
+
+        factpath = $vardir/lib/facter
+
+        pluginsync = true
+
+[agent]
+        server = PUPPETSERVER
+        configtimeout = 900
+
+        report = true
+
+        usecacheonfailure = false
+EOF

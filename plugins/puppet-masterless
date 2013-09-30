@@ -1,0 +1,1 @@
+insert_task_after $TASK_APT_UPGRADE $plugindir/puppet-masterless-tasks/init-puppet-masterless
