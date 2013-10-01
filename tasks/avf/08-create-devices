@@ -31,6 +31,6 @@ pv_device_path="/dev/mapper/$(basename "$image_device_path")p2"
 pvcreate "$pv_device_path"
 vgcreate avf-vg0 "$pv_device_path"
 
-lvcreate "-L$(( $image_size - 1 ))" -n root avf-vg0
+lvcreate "-L$(( $image_size - 1 ))G" -n root avf-vg0
 
 device_path="/dev/avf-vg0/root"
