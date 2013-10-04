@@ -84,6 +84,13 @@ if [ -e /etc/network/interfaces ]; then
 	exit 0
 fi
 
+# Set up loopback reguardless of mds results
+cat <<-EOF >>$ENI
+auto lo
+iface lo inet loopback
+
+EOF
+
 # Hokay, what NICs have we got?
 niclist="$(mds network/interfaces | sed 's%/$%%')"
 
