@@ -29,9 +29,9 @@ cleanups=()
 
 # General options about the instance
 arch='amd64'
-locale='en_US'
+locale='en_AU'
 charmap='UTF-8'
-timezone='UTC'
+timezone='Australia/Sydney'
 
 distribution='debian'
 codename='wheezy'
